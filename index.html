@@ -1,0 +1,23 @@
+<html>
+<head></head>
+<body>
+    <div class='main-container'>
+
+    </div>
+</body>
+
+<script type="text/javascript">
+    if('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./worker.js', {scope: './'});
+    }
+</script>
+
+
+<script type="text/javascript">
+    fetch('cat.jpg').then(function(response) {
+      return response.blob();
+    });
+
+</script>
+
+</html>

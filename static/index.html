@@ -1,0 +1,75 @@
+<html>
+	<head>
+    <script src="./node_modules/dexie/dist/dexie.js"></script>
+	</head>
+	<body>
+	  <div class='main-container'>
+	    <input onkeyup="sendEvent(event)"/>
+	  </div>
+
+    <script type='text/javascript'>
+      const DB_NAME = 'LogDB2';
+      const DB_VERSION = 2;
+      let db = new Dexie(DB_NAME);
+
+      db.version(DB_VERSION).stores({
+        log: '++id,type,data'
+      });
+
+      const sendEvent = (e) => {
+        db.transaction('rw', db.log, function* () {
+          let id = yield db.log.add({type: e.type, data: e.target.value});
+          console.log(`Inserted ${id}`);
+        })
+        .catch(e => {
+          console.log(`error: ${e}`);
+        });
+      }
+
+
+    </script>
+	  <script type='text/javascript'>
+        // const messageChannel = new MessageChannel();
+        // messageChannel.port1.onmessage = (e) => {
+        //   debugger;
+        // };
+        /**
+         * Send a message to the service worker
+         * @param  {Object|String} message
+         * @void
+         */
+        // const sendMessage = (message) => {
+        //     navigator.serviceWorker.controller.postMessage(message);
+        // };
+
+
+
+
+	      if ('serviceWorker' in navigator) {
+
+	        navigator.serviceWorker.register('./picard.js')
+            .then((registration) => {
+              if (registration.installing) {
+                serviceWorker = registration.installing;
+              } else if (registration.waiting) {
+                serviceWorker = registration.waiting;
+              } else if (registration.active) {
+                serviceWorker = registration.active;
+                // sendMessage('helloooooo');
+              }
+
+              if (serviceWorker) {
+                serviceWorker.addEventListener('statechange', function(e) {
+                  console.log(e.target.state);
+                  if (e.target.state === 'activated') {
+                    // sendMessage('helloooooo');
+                  }
+                });
+              }
+            })
+	      }
+	  </script>
+
+	</body>
+
+</html>
