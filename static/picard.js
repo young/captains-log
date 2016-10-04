@@ -1,30 +1,44 @@
 importScripts('./node_modules/dexie/dist/dexie.js');
-
+let db;
 const DB_NAME = 'LogDB2';
-const DB_VERSION = 2;
-let db = new Dexie(DB_NAME);
 
-this.oninstall =  () => {
-  // db.version(1).stores({
-  //      log: null
-  //     });
 
-  db.version(DB_VERSION).stores({
-       log: '++id,type,data'
-  });
+this.oninstall =  (event) => {
+    db = new Dexie(DB_NAME).open();
+    event.waitUntil(() => db)
 };
 
 this.onactivate = () => {
+  debugger;
   startPoll();
 };
 
-
+const headers = new Headers({
+  'Content-Type': 'application/json'
+});
 
 function startPoll() {
   setInterval(() => {
-    db.transaction('rw', function* () {
-      let foo = yield db.log.where("type").equals('keyup').toArray();
-      console.log(JSON.stringify(foo));
+   db.then((db) => {
+    const logTable = db.table('log');
+      db.transaction('rw', logTable, function* () {
+        let data = yield logTable
+          .where('type')
+          .equalsIgnoreCase('keyup')
+          .limit(25)
+          .toArray();
+
+        if (data.length) {
+          yield fetch('/logData', {method: 'POST', body: JSON.stringify(data), headers});
+
+          const ids = data.reduce((prev, item) => {
+              prev.push(item.id);
+              return prev;
+            }, []);
+
+          yield logTable.bulkDelete(ids);
+        }
+      });
     });
-  },  1000)
+  }, 5 * 1000)
 }

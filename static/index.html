@@ -29,22 +29,6 @@
 
     </script>
 	  <script type='text/javascript'>
-        // const messageChannel = new MessageChannel();
-        // messageChannel.port1.onmessage = (e) => {
-        //   debugger;
-        // };
-        /**
-         * Send a message to the service worker
-         * @param  {Object|String} message
-         * @void
-         */
-        // const sendMessage = (message) => {
-        //     navigator.serviceWorker.controller.postMessage(message);
-        // };
-
-
-
-
 	      if ('serviceWorker' in navigator) {
 
 	        navigator.serviceWorker.register('./picard.js')
@@ -55,14 +39,13 @@
                 serviceWorker = registration.waiting;
               } else if (registration.active) {
                 serviceWorker = registration.active;
-                // sendMessage('helloooooo');
               }
 
               if (serviceWorker) {
-                serviceWorker.addEventListener('statechange', function(e) {
-                  console.log(e.target.state);
-                  if (e.target.state === 'activated') {
-                    // sendMessage('helloooooo');
+                serviceWorker.addEventListener('statechange', function({target}) {
+                  console.log(target.state);
+                  if (target.state === 'activated') {
+                    console.log('Ready!')
                   }
                 });
               }
